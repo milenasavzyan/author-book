@@ -6,8 +6,7 @@ use common\models\Author;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-
-$this->title = 'Update Book';
+$this->title = 'Update ' . $model->title;
 $this->params['breadcrumbs'][] = ['label' => 'Books', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -23,11 +22,15 @@ $this->params['breadcrumbs'][] = $this->title;
 <?= $form->field($model, 'imageFile')->fileInput() ?>
 
 <?= $form->field($model, 'author_ids[]')->dropDownList(
-    Author::find()->select(['CONCAT(first_name, " ", last_name) AS full_name', 'id'])
-        ->indexBy('id')
-        ->column(),
-    ['prompt' => 'Select Author']
+    \yii\helpers\ArrayHelper::map(
+        Author::find()->all(),
+        'id',
+        function($model) {
+            return $model->first_name . ' ' . $model->last_name;
+        }
+    ),
 ) ?>
+
 
 <div class="form-group">
     <?= Html::submitButton('Update', ['class' => 'btn btn-primary']) ?>

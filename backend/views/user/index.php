@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 
     <div class="form-group">
-        <?= Html::a('Create User', ['update'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Create User', ['create'], ['class' => 'btn btn-success']) ?>
     </div>
 <?= GridView::widget([
     'filterModel' => $searchModel,

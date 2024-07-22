@@ -5,6 +5,18 @@ use Yii;
 use yii\db\ActiveRecord;
 use yii\web\UploadedFile;
 
+/**
+ * This is the model class for table "book".
+ *
+ * @property int $id
+ * @property string $title
+ * @property string|null $description
+ * @property string|null $image
+ * @property int|null $published_year
+ *
+ * @property Author[] $authors
+ */
+
 class Book extends ActiveRecord
 {
     public $imageFile;
@@ -63,7 +75,6 @@ class Book extends ActiveRecord
         return $this->hasMany(Author::class, ['id' => 'author_id'])
             ->via('authorBooks');
     }
-
     public function getAuthorBooks()
     {
         return $this->hasMany(AuthorBook::class, ['book_id' => 'id']);

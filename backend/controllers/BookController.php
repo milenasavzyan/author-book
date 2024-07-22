@@ -71,26 +71,24 @@ class BookController extends SiteController
             'model' => $model,
         ]);
     }
+
     public function actionUpdate($id)
     {
         $model = Book::findOne($id);
 
-        if ($model === null) {
+        if (!$model) {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
 
-        $currentImage = $model->image;
-
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            if ($model->imageFile) {
-                if (!empty($currentImage)) {
-                    unlink(Yii::getAlias('@uploads') . '/' . $currentImage);
+            if ($model->validate()) {
+                if ($model->save()) {
+                    if ($model->imageFile) {
+                        $model->imageFile->saveAs(Yii::getAlias('@uploads') . '/' . $model->image);
+                    }
                 }
-                // Save new image file
-                $model->image = $model->imageFile->baseName . '.' . $model->imageFile->extension;
-                $model->imageFile->saveAs(Yii::getAlias('@uploads') . '/' . $model->image);
-                $model->save(false); // Save again to update the image attribute in database
             }
 
             $authorIds = Yii::$app->request->post('Book')['author_ids'];
@@ -112,6 +110,7 @@ class BookController extends SiteController
             'model' => $model,
         ]);
     }
+
 
     public function actionDelete($id)
     {

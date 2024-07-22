@@ -5,10 +5,11 @@ use backend\models\UserSearch;
 use common\models\User;
 use Yii;
 use yii\db\ActiveRecord;
+use yii\web\Controller;
 use yii\web\IdentityInterface;
 
 
-class UserController extends SiteController
+class UserController extends Controller
 {
 
     public function actionIndex()
@@ -46,21 +47,29 @@ class UserController extends SiteController
             'user' => $user,
         ]);
     }
-    public function actionUpdate($id=null)
+    public function actionUpdate($id)
     {
-        /* @var ActiveRecord|IdentityInterface $identityClass */
-        $identityClass = Yii::$app->user->identityClass;
-        if ($id === null) {
-            $model = new $identityClass();
-        } else {
-            $model = $identityClass::findOne(['id' => $id]);
-        }
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['index']);
-        }
-        return $this->render('update', ['model' => $model]);
-    }
+        $model = User::findOne($id);
 
+        if (!$model) {
+            throw new \yii\web\NotFoundHttpException("User not found.");
+        }
+
+        if (Yii::$app->request->post()) {
+            if ($model->load(Yii::$app->request->post())) {
+                if ($model->save()) {
+                    Yii::$app->session->setFlash('success', 'User information updated successfully.');
+                    return $this->redirect(['index', 'id' => $model->id]);
+                } else {
+                    Yii::$app->session->setFlash('error', 'Failed to update user information.');
+                }
+            }
+        }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
+    }
     public function actionDelete($id)
     {
         /* @var ActiveRecord|IdentityInterface $identityClass */

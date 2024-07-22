@@ -54,11 +54,15 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            ['status', 'default', 'value' => self::STATUS_INACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
+            [['username', 'email'], 'required'],
+            [['username', 'email'], 'string', 'max' => 255],
+            ['email', 'email'],
+            [['status'], 'string'],
+            [['is_admin'], 'integer'],
+            [['status'], 'default', 'value' => self::STATUS_ACTIVE],
+            [['is_admin'], 'default', 'value' => 0],
         ];
     }
-
     /**
      * {@inheritdoc}
      */
