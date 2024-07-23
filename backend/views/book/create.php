@@ -30,6 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ->column(),
         ['prompt' => 'Select Author']
     ) ?>
+
     <div class="form-group">
         <?= Html::submitButton('Create', ['class' => 'btn btn-success']) ?>
     </div>

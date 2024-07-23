@@ -40,38 +40,45 @@ class BookController extends SiteController
     {
         $model = new Book();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            $model->save(false);
-
+        if ($model->load(Yii::$app->request->post())) {
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            $authorIds = $model->author_ids;
-            foreach ($authorIds as $authorId) {
-                $author = Author::findOne($authorId);
-                if ($author !== null) {
-                    $model->link('authors', $author);
-                }
-            }
 
             if ($model->validate()) {
-                $imageFile = $model->imageFile;
-
-                $imageName = Yii::$app->security->generateRandomString(10) . '.' . $imageFile->extension;
-
-                $uploadPath = Yii::getAlias('@uploads') . '/' . $imageName;
-                if ($imageFile->saveAs($uploadPath)) {
-                    $model->image = $imageName;
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
                     if ($model->save(false)) {
+                        $authorIds = $model->author_ids;
+                        foreach ($authorIds as $authorId) {
+                            $author = Author::findOne($authorId);
+                            if ($author !== null) {
+                                $model->link('authors', $author);
+                            }
+                        }
+
+                        if ($model->imageFile) {
+                            $imageName = Yii::$app->security->generateRandomString(10) . '.' . $model->imageFile->extension;
+                            $uploadPath = Yii::getAlias('@uploads') . '/' . $imageName;
+                            if ($model->imageFile->saveAs($uploadPath)) {
+                                $model->image = $imageName;
+                                $model->save(false);
+                            } else {
+                                Yii::error('Failed to upload image.');
+                            }
+                        }
+
+                        $transaction->commit();
                         Yii::$app->session->setFlash('success', 'Book created successfully.');
                         return $this->redirect(['index', 'id' => $model->id]);
                     } else {
                         Yii::error('Failed to save book.');
                     }
-                } else {
-                    Yii::error('Failed to upload image.');
+                } catch (\Exception $e) {
+                    $transaction->rollBack();
+                    Yii::error('Error: ' . $e->getMessage());
                 }
+            } else {
+                Yii::error('Validation error: ' . print_r($model->errors, true));
             }
-
-            return $this->redirect(['index', 'id' => $model->id]);
         }
 
         return $this->render('create', [

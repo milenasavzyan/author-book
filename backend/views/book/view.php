@@ -27,12 +27,11 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <li><strong>Publication:</strong><?= $book->publication_year ?></li>
                             </ul>
                             <strong>Author:</strong>
-<!--                            --><?php //foreach ($book->authors as $author): ?>
-<!--                                --><?php //= Html::encode($author->first_name . $author->last_name ) ?>
-<!--                            --><?php //endforeach; ?>
-                            <?= DetailView::widget([
-                                'model' => $book,
-                                'attributes' => [
+                            <?= GridView::widget([
+                                'dataProvider' => new \yii\data\ArrayDataProvider([
+                                    'allModels' => [$book],
+                                ]),
+                                'columns' => [
                                     'id',
                                     'title',
                                     [
@@ -48,6 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ],
                                 ],
                             ]) ?>
+
                             <span id="selectedAuthor"></span>
                         </div>
                     </div>
