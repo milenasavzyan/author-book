@@ -35,6 +35,8 @@ class Book extends ActiveRecord
             [['publication_year'], 'integer'],
             [['image', 'title'], 'string', 'max' => 255],
             [['imageFile'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, jpeg'],
+            ['author_ids', 'required', 'message' => 'Please select at least one author.'],
+            ['author_ids', 'each', 'rule' => ['integer']],
         ];
     }
 
@@ -57,17 +59,6 @@ class Book extends ActiveRecord
         if ($this->image) {
             return Yii::getAlias('@web/uploads') . '/' . $this->image;
         }
-    }
-
-    public function beforeSave($insert)
-    {
-        if (parent::beforeSave($insert)) {
-            if ($this->imageFile !== null) {
-                $this->image = $this->upload();
-            }
-            return true;
-        }
-        return false;
     }
 
     public function getAuthors()

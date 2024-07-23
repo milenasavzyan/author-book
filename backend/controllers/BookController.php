@@ -6,6 +6,7 @@ use backend\models\BookSearch;
 use common\models\Author;
 use common\models\Book;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 
@@ -40,27 +41,33 @@ class BookController extends SiteController
         $model = new Book();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            $model->save(false);
 
             $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            $authorIds = Yii::$app->request->post('Book')['author_ids'];
-            if (!empty($authorIds) && is_array($authorIds)) {
-                foreach ($authorIds as $authorId) {
-                    $author = Author::findOne($authorId);
-                    if ($author !== null) {
-                        $model->link('authors', $author);
-                    }
+            $authorIds = $model->author_ids;
+            foreach ($authorIds as $authorId) {
+                $author = Author::findOne($authorId);
+                if ($author !== null) {
+                    $model->link('authors', $author);
                 }
             }
 
             if ($model->validate()) {
-                if ($model->save()) {
-                    if ($model->imageFile) {
-                        $model->imageFile->saveAs(Yii::getAlias('@uploads') . '/' . $model->image);
+                $imageFile = $model->imageFile;
+
+                $imageName = Yii::$app->security->generateRandomString(10) . '.' . $imageFile->extension;
+
+                $uploadPath = Yii::getAlias('@uploads') . '/' . $imageName;
+                if ($imageFile->saveAs($uploadPath)) {
+                    $model->image = $imageName;
+                    if ($model->save(false)) {
+                        Yii::$app->session->setFlash('success', 'Book created successfully.');
+                        return $this->redirect(['index', 'id' => $model->id]);
+                    } else {
+                        Yii::error('Failed to save book.');
                     }
-                    Yii::$app->session->setFlash('success', 'Book created successfully.');
-                    return $this->redirect(['index', 'id' => $model->id]);
                 } else {
-                    Yii::error('Failed to save book.');
+                    Yii::error('Failed to upload image.');
                 }
             }
 

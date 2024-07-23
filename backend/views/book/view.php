@@ -2,7 +2,9 @@
 /* @var $this \yii\web\View */
 /* @var $model \common\models\Book */
 
+use yii\grid\GridView;
 use yii\helpers\Html;
+use yii\widgets\DetailView;
 
 
 $this->title = 'View Book';
@@ -25,9 +27,27 @@ $this->params['breadcrumbs'][] = $this->title;
                                 <li><strong>Publication:</strong><?= $book->publication_year ?></li>
                             </ul>
                             <strong>Author:</strong>
-                            <?php foreach ($book->authors as $author): ?>
-                                <?= Html::encode($author->first_name . $author->last_name ) ?>
-                            <?php endforeach; ?>
+<!--                            --><?php //foreach ($book->authors as $author): ?>
+<!--                                --><?php //= Html::encode($author->first_name . $author->last_name ) ?>
+<!--                            --><?php //endforeach; ?>
+                            <?= DetailView::widget([
+                                'model' => $book,
+                                'attributes' => [
+                                    'id',
+                                    'title',
+                                    [
+                                        'label' => 'Authors',
+                                        'value' => function ($model) {
+                                            $authors = [];
+                                            foreach ($model->authors as $author) {
+                                                $authors[] = Html::encode($author->first_name . ' ' . $author->last_name);
+                                            }
+                                            return implode(', ', $authors);
+                                        },
+                                        'format' => 'raw',
+                                    ],
+                                ],
+                            ]) ?>
                             <span id="selectedAuthor"></span>
                         </div>
                     </div>
