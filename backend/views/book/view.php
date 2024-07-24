@@ -29,24 +29,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             <strong>Author:</strong>
                             <?= GridView::widget([
                                 'dataProvider' => new \yii\data\ArrayDataProvider([
-                                    'allModels' => [$book],
+                                    'allModels' => $book->authors,
+                                    'pagination' => false,
                                 ]),
                                 'columns' => [
-                                    'id',
-                                    'title',
-                                    [
-                                        'label' => 'Authors',
-                                        'value' => function ($model) {
-                                            $authors = [];
-                                            foreach ($model->authors as $author) {
-                                                $authors[] = Html::encode($author->first_name . ' ' . $author->last_name);
-                                            }
-                                            return implode(', ', $authors);
-                                        },
-                                        'format' => 'raw',
-                                    ],
+                                        'id',
+                                    'first_name',
+                                    'last_name',
                                 ],
-                            ]) ?>
+                            ]); ?>
 
                             <span id="selectedAuthor"></span>
                         </div>

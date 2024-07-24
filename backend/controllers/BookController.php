@@ -35,7 +35,6 @@ class BookController extends SiteController
         ]);
     }
 
-
     public function actionCreate()
     {
         $model = new Book();
@@ -86,44 +85,6 @@ class BookController extends SiteController
         ]);
     }
 
-    public function actionUpdate($id)
-    {
-        $model = Book::findOne($id);
-
-        if (!$model) {
-            throw new NotFoundHttpException('The requested page does not exist.');
-        }
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-
-            $model->imageFile = UploadedFile::getInstance($model, 'imageFile');
-            if ($model->validate()) {
-                if ($model->save()) {
-                    if ($model->imageFile) {
-                        $model->imageFile->saveAs(Yii::getAlias('@uploads') . '/' . $model->image);
-                    }
-                }
-            }
-
-            $authorIds = Yii::$app->request->post('Book')['author_ids'];
-            $model->unlinkAll('authors', true);
-            if (!empty($authorIds) && is_array($authorIds)) {
-                foreach ($authorIds as $authorId) {
-                    $author = Author::findOne($authorId);
-                    if ($author !== null) {
-                        $model->link('authors', $author);
-                    }
-                }
-            }
-
-            Yii::$app->session->setFlash('success', 'Book updated successfully.');
-            return $this->redirect(['index']);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }
 
 
     public function actionDelete($id)
